@@ -5,13 +5,21 @@ import logging
 import cv2
 import numpy as np
 
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 # Python script to extract multiple icons/images from a single composite image
-def extract_multiple_images_from_composite(input_path, output_path):
+def extract_multiple_images_from_composite(input_path, output_path, zip_output=False):
+    logging.info(f"Starting icon extraction from {input_path} to {output_path}")
+
     # Load the image
     img = cv2.imread(input_path)
 
     if img is None:
-        print(f"Error: Could not load image from {input_path}")
+        #print(f"Error: Could not load image from {input_path}")
+        logging.error(f"Could not load image from {input_path}")
         return
 
     # Convert to grayscale and apply adaptive thresholding to get a binary image
@@ -51,21 +59,27 @@ def extract_multiple_images_from_composite(input_path, output_path):
             img_path = os.path.join(output_path, f"icon_{i + 1}.png")
             cv2.imwrite(img_path, roi_transparent)
             extracted_files.append(img_path)
+            logging.info(f"Saved image: {img_path}")
 
-    # Optionally zip the output folder
-    zip_file_path = f"{output_path}.zip"
-    shutil.make_archive(output_path, 'zip', output_path)
+    logging.info(f"Extraction complete. Saved {len(extracted_files)} icons.")
+    logging.info(f"Icons saved in: {output_path}")
 
-    print(f"Extraction complete. Saved {len(extracted_files)} icons.")
-    print(f"Icons saved in: {output_path}")
-    print(f"Download ZIP: {zip_file_path}")
+    if zip_output:
+        # Optionally zip the output folder
+        zip_file_path = f"{output_path}.zip"
+        shutil.make_archive(output_path, 'zip', output_path)
+        logging.info(f"Download ZIP: {zip_file_path}")
 
 if __name__ == "__main__":
     # Set up argument parser
-    parser = argparse.ArgumentParser(prog="extract_icons",usage='python %(prog)s <image path> <output directory>',description="Extract icons from an image.")
+    parser = argparse.ArgumentParser(prog="extract_multiple_images_from_composite",
+                                     usage='python %(prog)s <image path> <output directory> [options]',
+                                     description="Extract icons from an image.",
+                                     epilog="And that's how you extract images from a composite image!")
     parser.print_help()
     parser.add_argument("image_path", type=str, help="Path to the input image.")
     parser.add_argument("output_dir", type=str, help="Directory to save extracted icons.")
+    parser.add_argument("--zip", action="store_true", help="Option to zip the output directory.")
 
     # Parse arguments
     args = parser.parse_args()
@@ -76,4 +90,4 @@ if __name__ == "__main__":
 
     parser.print_help()
     # Run the extraction function
-    extract_multiple_images_from_composite(args.image_path, args.output_dir)
+    extract_multiple_images_from_composite(args.image_path, args.output_dir,args.zip)
