@@ -1,0 +1,20 @@
+[tool.poetry]
+package-mode = false
+name = "image-tools"
+version = "0.0.alpha.1"
+description = "Set of tools to process images"
+authors = ["Alien Tardigrade"]
+license = "MIT"
+readme = "docs/README.md"
+repository = "https://github.com/alien-tardigrade/Image-Tools"
+keywords = ["image", "tools", "processing"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+click = "^8.1.8"
+opencv-python = "^4.10.0.84"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
