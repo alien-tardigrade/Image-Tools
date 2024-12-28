@@ -14,7 +14,7 @@ MIN_CONTOUR_WIDTH = 20
 MIN_CONTOUR_HEIGHT = 20
 
 # Python script to extract multiple icons/images from a single composite image
-def extract_multiple_images_from_composite(input_path, output_path, zip_output=False):
+def extract_multiple_images_from_composite(input_path, output_path, zip_output=False, transparent=True):
     logging.info(f"Starting icon extraction from {input_path} to {output_path}")
 
     # Load the image
@@ -54,14 +54,23 @@ def extract_multiple_images_from_composite(input_path, output_path, zip_output=F
         if w > MIN_CONTOUR_WIDTH and h > MIN_CONTOUR_HEIGHT:  # Ignore small contours (noise)
             roi = img[y:y + h, x:x + w]
 
+            if transparent:
+                # Convert ROI to BGRA (add alpha channel)
+                roi = cv2.cvtColor(roi, cv2.COLOR_BGR2BGRA)
+                # Create mask for transparency
+                mask = np.zeros((h, w), dtype=np.uint8)
+                cv2.drawContours(mask, [contour - [x, y]], -1, 255, thickness=cv2.FILLED)
+                roi[:, :, 3] = mask  # Set alpha channel
+
             # Create mask for transparency
-            mask = np.zeros((h, w), dtype=np.uint8)
-            cv2.drawContours(mask, [contour - [x, y]], -1, (255), thickness=cv2.FILLED)
-            roi_transparent = cv2.bitwise_and(roi, roi, mask=mask)
+            #mask = np.zeros((h, w), dtype=np.uint8)
+            #cv2.drawContours(mask, [contour - [x, y]], -1, (255), thickness=cv2.FILLED)
+            #roi_transparent = cv2.bitwise_and(roi, roi, mask=mask)
 
             # Save the extracted icon
             img_path = os.path.join(output_path, f"{output_folder_name}_{i + 1}.png")
-            cv2.imwrite(img_path, roi_transparent)
+            ##cv2.imwrite(img_path, roi_transparent)
+            cv2.imwrite(img_path, roi)
             extracted_files.append(img_path)
             logging.info(f"Saved image: {img_path}")
 
@@ -84,6 +93,7 @@ if __name__ == "__main__":
     parser.add_argument("image_path", type=str, help="Path to the input image.")
     parser.add_argument("output_dir", type=str, help="Directory to save extracted icons.")
     parser.add_argument("--zip", action="store_true", help="Option to zip the output directory.")
+    parser.add_argument("--no-transparent", action="store_false", help="Option to not have a transparent background.")
 
     # Parse arguments
     args = parser.parse_args()
@@ -94,4 +104,4 @@ if __name__ == "__main__":
 
     parser.print_help()
     # Run the extraction function
-    extract_multiple_images_from_composite(args.image_path, args.output_dir,args.zip)
+    extract_multiple_images_from_composite(args.image_path, args.output_dir,args.zip, args.no_transparent)
