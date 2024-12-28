@@ -5,10 +5,13 @@ import logging
 import cv2
 import numpy as np
 
-
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Constants for small contours
+MIN_CONTOUR_WIDTH = 20
+MIN_CONTOUR_HEIGHT = 20
 
 # Python script to extract multiple icons/images from a single composite image
 def extract_multiple_images_from_composite(input_path, output_path, zip_output=False):
@@ -18,7 +21,6 @@ def extract_multiple_images_from_composite(input_path, output_path, zip_output=F
     img = cv2.imread(input_path)
 
     if img is None:
-        #print(f"Error: Could not load image from {input_path}")
         logging.error(f"Could not load image from {input_path}")
         return
 
@@ -49,7 +51,7 @@ def extract_multiple_images_from_composite(input_path, output_path, zip_output=F
         # Get the bounding box of the contour
         x, y, w, h = cv2.boundingRect(contour)
 
-        if w > 20 and h > 20:  # Ignore small contours (noise)
+        if w > MIN_CONTOUR_WIDTH and h > MIN_CONTOUR_HEIGHT:  # Ignore small contours (noise)
             roi = img[y:y + h, x:x + w]
 
             # Create mask for transparency
