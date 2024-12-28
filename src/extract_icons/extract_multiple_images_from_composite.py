@@ -38,6 +38,8 @@ def extract_multiple_images_from_composite(input_path, output_path, zip_output=F
 
     # Create output directory if it does not exist
     os.makedirs(output_path, exist_ok=True)
+    # Get the name of the output folder
+    output_folder_name = os.path.basename(os.path.normpath(output_path))
 
     # Extract the regions of interest based on the contours
     extracted_files = []
@@ -56,7 +58,7 @@ def extract_multiple_images_from_composite(input_path, output_path, zip_output=F
             roi_transparent = cv2.bitwise_and(roi, roi, mask=mask)
 
             # Save the extracted icon
-            img_path = os.path.join(output_path, f"icon_{i + 1}.png")
+            img_path = os.path.join(output_path, f"{output_folder_name}_{i + 1}.png")
             cv2.imwrite(img_path, roi_transparent)
             extracted_files.append(img_path)
             logging.info(f"Saved image: {img_path}")
